@@ -9,16 +9,18 @@ using System.Diagnostics;
 using Gauss;
 using Uniform;
 using SaltAndPepper;
+using System.Threading.Tasks;
+
 namespace noiseProject
 {
     public partial class App : Form
     {
 
 
-        [DllImport(@"C:\Users\Bushmeen\Desktop\nosieV3\x64\Debug\asmLibrary.dll")]
-        static extern void addNoise(byte[] result, byte[] buffer, byte[] noise, int bytes);
+        [DllImport(@"C:\Users\bushm\Source\Repos\addNoiseOnImage\x64\Debug\asmLibrary.dll")]
+        static extern void addNoise(byte[] result, byte[] buffer, byte[] noise, int start,int end);
 
-        [DllImport(@"C:\Users\Bushmeen\Desktop\nosieV3\x64\Debug\asmLibrary.dll")]
+        [DllImport(@"C:\Users\bushm\Source\Repos\addNoiseOnImage\x64\Debug\asmLibrary.dll")]
         static extern void calcGaussian(double[] gaussian, int std);
 
         private int choosenAlgortihm = 0;
@@ -308,7 +310,15 @@ namespace noiseProject
 
 
 
-            addNoise(result, buffer, noise, bytes);
+            Parallel.For(0, threadsNumber, t =>
+            {
+                int segmentSize = bytes / threadsNumber;
+                int start = t * segmentSize;
+                int end = (t == threadsNumber - 1) ? bytes : start + segmentSize;
+
+                addNoise(result, buffer, noise, start, end);
+            });
+
 
 
             Bitmap resultImage = new Bitmap(w, h);
@@ -371,7 +381,15 @@ namespace noiseProject
 
             noise = noise.OrderBy(x => rnd.Next()).ToArray();
 
-            addNoise(result, buffer, noise, bytes);
+            Parallel.For(0, threadsNumber, t =>
+            {
+                int segmentSize = bytes / threadsNumber;
+                int start = t * segmentSize;
+                int end = (t == threadsNumber - 1) ? bytes : start + segmentSize;
+              
+                 addNoise(result, buffer, noise, start,end);
+            });
+
 
             Bitmap resultImage = new Bitmap(w, h);
             BitmapData resultData = resultImage.LockBits(

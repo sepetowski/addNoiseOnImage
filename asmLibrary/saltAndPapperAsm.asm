@@ -3,31 +3,31 @@ addNoise PROC
     ; rcx - wskaznik do tablicy result
     ; rdx - wskaznik do tablicy buffer
     ; r8 - wskaanik do tablicy noise
-    ; r9 - liczba bajtów (bytes)
+    ; r9 - start
 
- 
-    xor rax, rax  ; Zerujemy licznik
+    mov r10,  [rsp + 40]  ; end
+        
     loop_start:
         ; Wczytujemy 16 bajtów z tablicy buffer do xmm0
-        movdqu xmm0, [rdx + rax]
+        movdqu xmm0, [rdx + r9]
 
         ; Wczytujemy 16 bajtów z tablicy noise do xmm1
-        movdqu xmm1, [r8 + rax]
+        movdqu xmm1, [r8 + r9]
 
         ; Dodajemy wartsci z xmm0 i xmm1
         paddb xmm0, xmm1
 
         ; Zapisujemy wynik do tablicy result
-        movdqu [rcx + rax], xmm0
+        movdqu [rcx + r9], xmm0
 
         ; Inkrementujemy licznik o 16
-        add rax, 16
+        add r9, 16
 
-        ; Sprawdzamy, czy doszlismy do knca tablicy
-        cmp rax, r9
+        ; Sprawdzamy, czy doszlismy do konca tablicy
+        cmp r9, r10
         jl loop_start  ; Jezli nie, to powtarzamy petle
 
-        ret
+    ret
 addNoise ENDP
 
 calcGaussian PROC
